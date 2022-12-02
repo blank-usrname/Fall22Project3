@@ -19,7 +19,7 @@ def create_world():
     i = Item("Rock", "This is just a rock.")
     i.put_in_room(b)
     player.location = a
-    Monster("Bob the monster", 20, b)
+    Monster("Slime", 1, b)
 
 def clear():
     os.system('cls' if os.name == 'nt' else 'clear')
@@ -90,6 +90,10 @@ if __name__ == "__main__":
                     show_help()
                 case "exit":
                     playing = False
+                case "me":
+                    player.show_status()
+                case "wait":
+                    time_passes = True
                 case "attack":
                     target_name = command[7:]
                     target = player.location.get_monster_by_name(target_name)

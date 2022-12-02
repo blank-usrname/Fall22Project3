@@ -2,10 +2,13 @@ import random
 import updater
 
 class Monster:
-    def __init__(self, name, health, room):
+    def __init__(self, name, level, room):
         self.name = name
-        self.health = health
         self.room = room
+        self.level = level
+        self.health = 20 + (level-1) * 10 
+        self.atk = 3 + (level-1)
+        self.defe = 2 + (level-1)
         room.add_monster(self)
         updater.register(self)
     def update(self):
