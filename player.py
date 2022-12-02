@@ -1,4 +1,5 @@
 import os
+import random
 
 def clear():
     os.system('cls' if os.name == 'nt' else 'clear')
@@ -26,6 +27,15 @@ class Player:
         self.items.append(item)
         item.loc = self
         self.location.remove_item(item)
+    def is_in_inventory(self, name):
+        for i in self.items:
+            if i.name.lower() == name.lower():
+                return i
+        return False
+    def drop(self, item):
+        self.items.remove(item)
+        item.loc = self.location
+        self.location.add_item(item)
     def show_inventory(self):
         clear()
         print("You are currently carrying:")
@@ -42,10 +52,10 @@ class Player:
         print(mon.name + "'s health is " + str(mon.health) + ".")
         print()
         if self.health > mon.health:
-            self.health -= (mon.health + self.defe)
+            self.health -= (mon.health - self.defe)
             print("You win. Your health is now " + str(self.health) + ".")
             mon.die()
-            exp = (mon.level//self.level) + 3
+            exp = 50#(mon.level//self.level) + 3
             print("Awarded " + str(exp) + " exp.")
             self.exp += exp
             self.level_up()
@@ -75,6 +85,7 @@ class Player:
         print("Player status:")
         print()
         print(f"Player level: {self.level}")
+        print(f"Player EXP: {self.exp}/{self.level * 50}")
         print(f"Player health: {self.health}/{self.mhp}")
         print(f"Attack: {self.atk}")
         print(f"Defense: {self.defe}")

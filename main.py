@@ -1,6 +1,7 @@
 from room import Room
 from player import Player
 from item import Item
+from item import Consumable
 from monster import Monster
 import os
 import updater
@@ -8,18 +9,22 @@ import updater
 player = Player()
 
 def create_world():
-    a = Room("You are in room 1")
-    b = Room("You are in room 2")
-    c = Room("You are in room 3")
-    d = Room("You are in room 4")
-    Room.connect_rooms(a, "east", b, "west")
-    Room.connect_rooms(c, "east", d, "west")
-    Room.connect_rooms(a, "north", c, "south")
-    Room.connect_rooms(b, "north", d, "south")
+    a_1 = Room("You are in room 1")
+    a_2 = Room("You are in room 2")
+    a_3 = Room("You are in room 3")
+    a_4 = Room("You are in room 4")
+    Room.connect_rooms(a_1, "east", a_2, "west")
+    Room.connect_rooms(a_3, "east", a_4, "west")
+    Room.connect_rooms(a_1, "north", a_3, "south")
+    Room.connect_rooms(a_2, "north", a_4, "south")
     i = Item("Rock", "This is just a rock.")
-    i.put_in_room(b)
-    player.location = a
-    Monster("Slime", 1, b)
+    j = Consumable("Crest of Flames", "Grants +10 to Max HP and +5 to all other stats.", 10, 5, "all")
+    k = Consumable("Salve", "Heals 20 HP", 20, 0, "heal")
+    i.put_in_room(a_2)
+    j.put_in_room(a_1)
+    k.put_in_room(a_3)
+    player.location = a_1
+    Monster("Slime", 1, a_2)
 
 def clear():
     os.system('cls' if os.name == 'nt' else 'clear')
@@ -47,7 +52,10 @@ def show_help():
     clear()
     print("go <direction> -- moves you in the given direction")
     print("inventory -- opens your inventory")
+    print("me -- displays information about yourself")
     print("pickup <item> -- picks up the item")
+    print("save <file1/file2/file3> -- saves current session to file")
+    print("load <file1/file2/file3> -- saves current session to file")
     print("quit -- quits the game")
     print()
     input("Press enter to continue...")
@@ -83,6 +91,22 @@ if __name__ == "__main__":
                         player.pickup(target)
                     else:
                         print("No such item.")
+                        command_success = False
+                case "use":  #can handle multi-word objects
+                    target_name = command[4:] # everything after "use "
+                    target = player.is_in_inventory(target_name)
+                    if target != False:
+                        target.consume(player)
+                    else:
+                        print("Item does not exist within inventory.")
+                        command_success = False
+                case "drop":  #can handle multi-word objects
+                    target_name = command[5:] # everything after "drop "
+                    target = player.is_in_inventory(target_name)
+                    if target != False:
+                        player.drop(target)
+                    else:
+                        print("Item does not exist within inventory.")
                         command_success = False
                 case "inventory":
                     player.show_inventory()
