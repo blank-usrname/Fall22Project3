@@ -2,9 +2,12 @@ from room import Room
 from player import Player
 from item import Item
 from item import Consumable
+from item import Weapon
+from item import Armor
 from monster import Monster
 import os
 import updater
+import system
 
 player = Player()
 
@@ -17,9 +20,14 @@ def create_world():
     Room.connect_rooms(a_3, "east", a_4, "west")
     Room.connect_rooms(a_1, "north", a_3, "south")
     Room.connect_rooms(a_2, "north", a_4, "south")
-    i = Item("Rock", "This is just a rock.")
-    j = Consumable("Crest of Flames", "Grants +10 to Max HP and +5 to all other stats.", 10, 5, "all")
-    k = Consumable("Salve", "Heals 20 HP", 20, 0, "heal")
+    sword = Weapon("Excalipoor", "A legendary sword?.", 3, 25, 80)
+    pipe = Weapon("Iron Pipe", "Massive damage, but only hits 1/4 of the time.", 15, 40, 25)
+    armor = Armor("Diamond chestplate", "testing different armors.", 10, 10)
+    i = Item("Rock", "This is just a rock.", 10)
+    j = Consumable("Ambrosia", "Grants +10 to Max HP and +5 to all other stats.", 3, 10, 5, "all")
+    k = Consumable("Salve", "Use when injured. Heals 20 HP", 1, 20, 0, "heal")
+    sword.put_in_room(a_1)
+    pipe.put_in_room(a_1)
     i.put_in_room(a_2)
     j.put_in_room(a_1)
     k.put_in_room(a_3)
@@ -88,7 +96,11 @@ if __name__ == "__main__":
                     target_name = command[7:] # everything after "pickup "
                     target = player.location.get_item_by_name(target_name)
                     if target != False:
-                        player.pickup(target)
+                        if player.can_pickup(target):
+                            player.pickup(target)
+                        else:
+                            print("Cannot pickup item. Not enough inventory space.")
+                            command_success = False
                     else:
                         print("No such item.")
                         command_success = False
@@ -96,7 +108,44 @@ if __name__ == "__main__":
                     target_name = command[4:] # everything after "use "
                     target = player.is_in_inventory(target_name)
                     if target != False:
-                        target.consume(player)
+                        if (target.is_consumable()):
+                            clear()
+                            target.consume(player)
+                        else:
+                            print(f"Cannot use {target.name}")
+                            command_success = False
+                    else:
+                        print("Item does not exist within inventory.")
+                        command_success = False
+                case "inspect":  #can handle multi-word objects
+                    target_name = command[8:] # everything after "inspect "
+                    target = player.is_in_inventory(target_name)
+                    if target != False:
+                        clear()
+                        target.describe()
+                    else:
+                        target = player.location.get_item_by_name(target_name)
+                        if target != False:
+                            clear()
+                            target.describe()
+                        else:
+                            print("Item cannot be found.")
+                            command_success = False
+                case "equip":  #can handle multi-word objects
+                    target_name = command[6:] # everything after "equip "
+                    target = player.is_in_inventory(target_name)
+                    if target != False:
+                        clear()
+                        if (target.is_equippable()):
+                            if (target.is_weapon()):
+                                clear()
+                                player.equip_weapon(target)
+                            else:
+                                clear()
+                                player.equip_armor(target)
+                        else:
+                            print(f"Cannot equip {target.name}")
+                            command_success = False
                     else:
                         print("Item does not exist within inventory.")
                         command_success = False
@@ -122,7 +171,7 @@ if __name__ == "__main__":
                     target_name = command[7:]
                     target = player.location.get_monster_by_name(target_name)
                     if target != False:
-                        player.attack_monster(target)
+                        system.attack_enemy(player, target)
                     else:
                         print("No such monster.")
                         command_success = False

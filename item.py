@@ -1,46 +1,57 @@
 import os
+import random
 
 def clear():
     os.system('cls' if os.name == 'nt' else 'clear')
 
 class Item:
-    def __init__(self, name, desc):
+    def __init__(self, name, desc, wgt):
         self.name = name
+        self.wgt = wgt # weight has impact on holding capacity
         self.desc = desc
         self.loc = None
     def describe(self):
         clear()
         print(self.desc)
+        print(f"Weight: +{self.wgt}") 
         print()
         input("Press enter to continue...")
     def put_in_room(self, room):
         self.loc = room
         room.add_item(self)
+    def is_equippable(self):
+        return False
+    def is_consumable(self):
+        return False 
 
 class Weapon(Item):
     def __init__(self, name, desc, atk, wgt, acc):
-        super().__init__(name, desc)
-        self.atk = atk
-        self.wgt = wgt
-        self.acc = acc
+        super().__init__(name, desc, wgt) # weight has additional effect on weapons of lowering one's evasion (does this one make any sense?)
+        self.atk = atk # bonus to attack power
+        self.acc = acc # accuracy of weapon
         self.loc = None
     def describe(self):
         clear()
+        print()
         print(self.desc)
+        print()
         print("Weapon statistics:")
         print(f"Attack bonus: +{self.atk}")
         print(f"Accuracy: {self.acc}%")
-        print(f"Weight: +{self.wgt}")
+        print(f"Weight: +{self.wgt}") 
         print()
         input("Press enter to continue...")
+    def is_equippable(self):
+        return True
+    def is_weapon(self):
+        return True
+    def is_consumable(self):
+        return False 
 
 class Armor(Item):
     def __init__(self, name, desc, defe, wgt):
-        super().__init__(name, desc)
-        self.defe = defe
-        self.wgt = wgt
-        self.acc = acc
-        self.loc = None
+        super().__init__(name, desc, wgt) # weight has additional effect of lowering one's evasion (does this one make any sense?)
+        self.defe = defe # bonus to defense
     def describe(self):
         clear()
         print(self.desc)
@@ -49,16 +60,21 @@ class Armor(Item):
         print(f"Weight: +{self.wgt}")
         print()
         input("Press enter to continue...")
+    def is_equippable(self):
+        return True
+    def is_weapon(self):
+        return False
+    def is_consumable(self):
+        return False 
 
 class Consumable(Item):
-    def __init__(self, name, desc, hp_heal, buff, buff_type):
-        super().__init__(name, desc)
+    def __init__(self, name, desc, wgt, hp_heal, buff, buff_type):
+        super().__init__(name, desc, wgt)
         self.hp_heal = hp_heal
         self.buff = buff
         self.buff_type = buff_type
         self.loc = None
     def consume(self, player):
-        clear()
         print(f"Used the {self.name}.")
         print()
         # if (sp_heal != 0): # two different ifs used here,,, deciding if hp/sp healing items are mutually exclusive... atm no...
@@ -94,4 +110,10 @@ class Consumable(Item):
                 player.atk += self.buff
                 player.defe += self.buff            
         print()
+        player.items.remove(self)
+        player.curr_carry -= self.wgt
         input("Press enter to continue...")
+    def is_equippable(self):
+        return False
+    def is_consumable(self):
+        return True 

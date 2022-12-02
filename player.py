@@ -1,5 +1,7 @@
 import os
 import random
+from item import Weapon
+from item import Armor
 
 def clear():
     os.system('cls' if os.name == 'nt' else 'clear')
@@ -8,12 +10,17 @@ class Player:
     def __init__(self):
         self.location = None
         self.items = []
+        self.armor = Armor("Cloth shirt", "Everyday clothing.", 1, 1) # current equipped armor 
+        self.weapon = Weapon("Sword", "A basic trainee's sword.", 1, 1, 90) # current equipped weapon 
         self.level = 1
-        self.mhp = 50
-        self.health = self.mhp
-        self.atk = 5
-        self.defe = 5
-        self.exp = 0
+        self.mhp = 50 # maximum HP player has in battle
+        self.health = self.mhp 
+        self.atk = 2 # attack, increase damage dealt in battle
+        self.defe = 2 # defense, reduces damage taken in battle
+        self.carry = 40 + 10 * self.level # carrying capacity goes up with level.
+        self.curr_carry = self.armor.wgt + self.weapon.wgt # current sum of item weights (does it make sense to add armor and weapon weight?)
+        self.exp = 0 # exp for leveling up, level up every 50*level exp
+        self.gold = 200
         self.alive = True
     # goes in specified direction if possible, returns True
     # if not possible returns False
@@ -23,19 +30,28 @@ class Player:
             self.location = new_location
             return True
         return False
+    def can_pickup(self, item): # again, weapon and armor weight factored, should they be?
+        current_holding = self.curr_carry + item.wgt
+        if (current_holding > self.carry):
+            return False
+        else:
+            return True
     def pickup(self, item):
         self.items.append(item)
         item.loc = self
         self.location.remove_item(item)
+        self.curr_carry += item.wgt
     def is_in_inventory(self, name):
         for i in self.items:
             if i.name.lower() == name.lower():
                 return i
         return False
     def drop(self, item):
+        self.curr_carry -= item.wgt # why isn't this working? consume seems to work however,,,
         self.items.remove(item)
-        item.loc = self.location
-        self.location.add_item(item)
+        item.loc = None # is this behavior preferred?
+        # item.loc = self.location
+        # self.location.add_item(item)
     def show_inventory(self):
         clear()
         print("You are currently carrying:")
@@ -43,52 +59,31 @@ class Player:
         for i in self.items:
             print(i.name)
         print()
-        input("Press enter to continue...")
-    def attack_monster(self, mon):
-        clear()
-        print("You are attacking " + mon.name)
-        print()
-        print("Your health is " + str(self.health) + ".")
-        print(mon.name + "'s health is " + str(mon.health) + ".")
-        print()
-        if self.health > mon.health:
-            self.health -= (mon.health - self.defe)
-            print("You win. Your health is now " + str(self.health) + ".")
-            mon.die()
-            exp = 50#(mon.level//self.level) + 3
-            print("Awarded " + str(exp) + " exp.")
-            self.exp += exp
-            self.level_up()
-        else:
-            print("You lose.")
-            self.alive = False
-        print()
-        input("Press enter to continue...")
-    def attack_monster2(self, mon):
-        clear()
-        print("You are attacking " + mon.name)
-        if (self.health >= 0 and mon.health >= 0):
-            print()
-            print("Your health is " + str(self.health) + ".")
-            print(mon.name + "'s health is " + str(mon.health) + ".")
-            print()
-            print("What action will you take?")
-            print("[A]ttack, [R]un")
-            while (self.health >= 0 and mon.health >= 0):
-                continue
+        print(f"You are currently using: {self.curr_carry}/{self.carry} total inventory slots.")
         print()
         input("Press enter to continue...")
     def drop(self, item):
         self.items.remove(item)
+    def equip_weapon(self, item):
+        self.items.remove(item)
+        self.items.append(self.weapon)
+        self.weapon = item
+    def equip_armor(self, item):
+        self.items.remove(item)
+        self.items.append(self.armor)
+        self.armor = item
     def show_status(self):
         clear()
         print("Player status:")
         print()
-        print(f"Player level: {self.level}")
-        print(f"Player EXP: {self.exp}/{self.level * 50}")
-        print(f"Player health: {self.health}/{self.mhp}")
-        print(f"Attack: {self.atk}")
-        print(f"Defense: {self.defe}")
+        print(f"Level: {self.level}")
+        print(f"EXP: {self.exp}/{self.level * 50}")
+        print(f"HP: {self.health}/{self.mhp}")
+        print(f"Attack: {self.atk} (+{self.weapon.atk})")
+        print(f"Defense: {self.defe} (+{self.armor.defe})")
+        print()
+        print(f'Current Weapon: {self.weapon.name}, "{self.weapon.desc}"')
+        print(f'Current Armor: {self.armor.name}, "{self.armor.desc}"')
         print()
         input("Press enter to continue...")
     def level_up(self):
