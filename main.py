@@ -4,12 +4,15 @@ from item import Item
 from item import Consumable
 from item import Weapon
 from item import Armor
+from npc import NPC
+from npc import Merchant
 from monster import Monster
 import os
 import updater
 import system
 
 player = Player()
+
 
 def create_world():
     a_1 = Room("You are in room 1")
@@ -20,19 +23,20 @@ def create_world():
     Room.connect_rooms(a_3, "east", a_4, "west")
     Room.connect_rooms(a_1, "north", a_3, "south")
     Room.connect_rooms(a_2, "north", a_4, "south")
-    sword = Weapon("Excalipoor", "A legendary sword?.", 3, 25, 80)
-    pipe = Weapon("Iron Pipe", "Massive damage, but only hits 1/4 of the time.", 15, 40, 25)
-    armor = Armor("Diamond chestplate", "testing different armors.", 10, 10)
-    i = Item("Rock", "This is just a rock.", 10)
-    j = Consumable("Ambrosia", "Grants +10 to Max HP and +5 to all other stats.", 3, 10, 5, "all")
-    k = Consumable("Salve", "Use when injured. Heals 20 HP", 1, 20, 0, "heal")
-    sword.put_in_room(a_1)
+    pipe = Weapon("Iron Pipe", "Strong, but only hits 1/4 of the time.", 15, 40, 25, 250)
+    armor = Armor("Diamond chestplate", "testing different armors.", 10, 10, 1000)
+    i = Item("Rock", "This is just a rock.", 10, 0)
+    j = Consumable("Ambrosia", "Grants +10 to Max HP and +5 to all other stats.", 3, 10, 5, "all", 3500)
+    test_unpurchasable = Item("test_item", "you should not purchase this item!", 40, 10000000)
+    test_item = Consumable("Salve", "Use when injured. Heals 20 HP", 1, 20, 0, "heal", 100)
+    test_weapon = Weapon("Excalipoor", "A legendary sword?.", 3, 25, 80, 1000)
+    wares = [test_unpurchasable, test_item, test_weapon]
     pipe.put_in_room(a_1)
     i.put_in_room(a_2)
     j.put_in_room(a_1)
-    k.put_in_room(a_3)
     player.location = a_1
     Monster("Slime", 1, a_2)
+    Merchant("test", "test_merchant", a_1, wares)
 
 def clear():
     os.system('cls' if os.name == 'nt' else 'clear')
@@ -44,6 +48,11 @@ def print_situation():
     if player.location.has_monsters():
         print("This room contains the following monsters:")
         for m in player.location.monsters:
+            print(m.name)
+        print()
+    if player.location.has_npcs():
+        print("This room contains the following NPCS:")
+        for m in player.location.npcs:
             print(m.name)
         print()
     if player.location.has_items():
@@ -62,8 +71,13 @@ def show_help():
     print("inventory -- opens your inventory")
     print("me -- displays information about yourself")
     print("pickup <item> -- picks up the item")
-    print("save <file1/file2/file3> -- saves current session to file")
-    print("load <file1/file2/file3> -- saves current session to file")
+    print("inspect <item> -- displays information about an item")
+    print("drop <item> -- removes item from your inventory")
+    print("equip <item> -- equips item")
+    print("use <item> -- equips item")
+    print("store -- brings up store")
+    # print("save <file1/file2/file3> -- saves current session to file")
+    # print("load <file1/file2/file3> -- saves current session to file")
     print("quit -- quits the game")
     print()
     input("Press enter to continue...")
@@ -159,6 +173,14 @@ if __name__ == "__main__":
                         command_success = False
                 case "inventory":
                     player.show_inventory()
+                case "store":
+                    target_name = command[6:]
+                    target = player.location.get_npc_by_name(target_name)
+                    if target != False:
+                        system.store(player, target)
+                    else:
+                        print("No such monster.")
+                        command_success = False
                 case "help":
                     show_help()
                 case "exit":

@@ -7,6 +7,7 @@ def clear():
 
 def attack_enemy(player, enemy):
     clear()
+    print()
     print(enemy.name + " draws near!")
     print()
     print("Your health is " + str(player.health) + ".")
@@ -71,9 +72,11 @@ def attack_enemy(player, enemy):
             print(f"{enemy.name} misses!")          
     if player.health >= 0:
         print("You win!")
-        enemy.die()
         exp = (enemy.level//player.level) + 3
         print("Awarded " + str(exp) + " exp.")
+        gold = enemy.gold
+        print("Awarded " + str(gold) + "G.")
+        enemy.die()
         player.exp += exp
         player.level_up()
     else:
@@ -81,3 +84,117 @@ def attack_enemy(player, enemy):
         player.alive = False
     print()
     input("Press enter to continue...")
+
+def store(player, merchant):
+    clear()
+    print()
+    print("Welcome!")
+    print()
+    command_success = False
+    while not command_success:
+        command_success = True
+        command = input("What action would you like to take? (buy/sell/leave)")
+        if len(command) == 0:
+            continue
+        command_words = command.split()
+        if len(command_words) == 0:
+            continue
+        match command_words[0].lower():
+                case "buy":
+                    clear()
+                    store_buy(player, merchant)
+                case "sell":
+                    clear()
+                    store_sell(player, merchant)
+                case "leave":
+                    clear()
+                    print("Thanks for stopping by!")
+                    return
+                case other:
+                    print()
+                    print("I'm not quite sure what you're asking.")
+                    print()
+                    command_success = False
+
+def store_buy(player, merchant):
+    buying = True
+    while buying:
+        command_success = False
+        while not command_success:
+            print()
+            print("Here are my wares:")
+            for item in merchant.items:
+                print(f"{item.name}: f{item.value}")
+            print()
+            command_success = True
+            command = input("What action would you like to take? (buy <item>/inspect <item>) ")
+            if len(command) == 0:
+                continue
+            command_words = command.split()
+            if len(command_words) == 0:
+                continue
+            match command_words[0].lower():
+                case "inspect":  #can handle multi-word objects
+                    target_name = command[8:] # everything after "inspect "
+                    target = merchant.is_in_inventory(target_name)
+                    if target != False:
+                        clear()
+                        target.describe()
+                    else:
+                        print("I'm not quite sure what item you're specifying.")
+                        command_success = False
+                case "buy":
+                    target_name = command[4:] # everything after "buy "
+                    target = merchant.is_in_inventory(target_name)
+                    if target != False:
+                        if (player.can_buy(target)):
+                            player.buy(target)
+                            merchant.items.remove(target)
+                            print("Many thanks!")
+                        else:
+                            print("Sorry, you don't have enough gold to purchase this item.")
+                            command_success = False
+                    else:
+                        print("I'm not quite sure what item you're specifying.")
+                        command_success = False
+                case "back":
+                    clear()
+                    buying = False
+                case other:
+                    print()
+                    print("I'm not quite sure what you're asking.")
+                    print()
+                    command_success = False
+
+def store_sell(player, merchant):
+    selling = True
+    while selling:
+        command_success = False
+        while not command_success:
+            print()
+            command_success = True
+            command = input("What would you like to sell? (sell <item>/back) ")
+            if len(command) == 0:
+                continue
+            command_words = command.split()
+            if len(command_words) == 0:
+                continue
+            match command_words[0].lower():
+                case "sell":
+                    target_name = command[5:] # everything after "sell "
+                    target = player.is_in_inventory(target_name)
+                    if target != False:
+                        player.gold += target.value
+                        player.items.remove(target)
+                        print("Many thanks!")
+                    else:
+                        print("You do not seem to have that item.")
+                        command_success = False
+                case "back":
+                    clear()
+                    selling = False
+                case other:
+                    print()
+                    print("I'm not quite sure what you're asking.")
+                    print()
+                    command_success = False

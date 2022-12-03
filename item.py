@@ -5,9 +5,10 @@ def clear():
     os.system('cls' if os.name == 'nt' else 'clear')
 
 class Item:
-    def __init__(self, name, desc, wgt):
+    def __init__(self, name, desc, wgt, value):
         self.name = name
         self.wgt = wgt # weight has impact on holding capacity
+        self.value = value # sell price of item, buying price is 2x
         self.desc = desc
         self.loc = None
     def describe(self):
@@ -25,8 +26,8 @@ class Item:
         return False 
 
 class Weapon(Item):
-    def __init__(self, name, desc, atk, wgt, acc):
-        super().__init__(name, desc, wgt) # weight has additional effect on weapons of lowering one's evasion (does this one make any sense?)
+    def __init__(self, name, desc, atk, wgt, acc, value):
+        super().__init__(name, desc, wgt, value) # weight has additional effect on weapons of lowering one's evasion (does this one make any sense?)
         self.atk = atk # bonus to attack power
         self.acc = acc # accuracy of weapon
         self.loc = None
@@ -35,7 +36,7 @@ class Weapon(Item):
         print()
         print(self.desc)
         print()
-        print("Weapon statistics:")
+        print(f"{self.name} statistics:")
         print(f"Attack bonus: +{self.atk}")
         print(f"Accuracy: {self.acc}%")
         print(f"Weight: +{self.wgt}") 
@@ -49,13 +50,13 @@ class Weapon(Item):
         return False 
 
 class Armor(Item):
-    def __init__(self, name, desc, defe, wgt):
-        super().__init__(name, desc, wgt) # weight has additional effect of lowering one's evasion (does this one make any sense?)
+    def __init__(self, name, desc, defe, wgt,value):
+        super().__init__(name, desc, wgt,value) # weight has additional effect of lowering one's evasion (does this one make any sense?)
         self.defe = defe # bonus to defense
     def describe(self):
         clear()
         print(self.desc)
-        print("Armor statistics:")
+        print(f"{self.name} statistics:")
         print(f"Defense bonus: +{self.defe}")
         print(f"Weight: +{self.wgt}")
         print()
@@ -68,13 +69,13 @@ class Armor(Item):
         return False 
 
 class Consumable(Item):
-    def __init__(self, name, desc, wgt, hp_heal, buff, buff_type):
-        super().__init__(name, desc, wgt)
+    def __init__(self, name, desc, wgt, hp_heal, buff, buff_type, value):
+        super().__init__(name, desc, wgt, value)
         self.hp_heal = hp_heal
         self.buff = buff
         self.buff_type = buff_type
         self.loc = None
-    def consume(self, player):
+    def consume(self, player): # this function seems to fit more in player compared to item,,, will change soon
         print(f"Used the {self.name}.")
         print()
         # if (sp_heal != 0): # two different ifs used here,,, deciding if hp/sp healing items are mutually exclusive... atm no...

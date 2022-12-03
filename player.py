@@ -10,8 +10,8 @@ class Player:
     def __init__(self):
         self.location = None
         self.items = []
-        self.armor = Armor("Cloth shirt", "Everyday clothing.", 1, 1) # current equipped armor 
-        self.weapon = Weapon("Sword", "A basic trainee's sword.", 1, 1, 90) # current equipped weapon 
+        self.armor = Armor("Cloth shirt", "Everyday clothing.", 1, 1, 100) # current equipped armor 
+        self.weapon = Weapon("Sword", "A basic trainee's sword.", 1, 1, 90, 100) # current equipped weapon 
         self.level = 1
         self.mhp = 50 # maximum HP player has in battle
         self.health = self.mhp 
@@ -62,6 +62,10 @@ class Player:
         print(f"You are currently using: {self.curr_carry}/{self.carry} total inventory slots.")
         print()
         input("Press enter to continue...")
+    def can_buy(self, item):
+        if (item.value > self.gold):
+            return False
+        return True
     def drop(self, item):
         self.items.remove(item)
     def equip_weapon(self, item):

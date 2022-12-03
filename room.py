@@ -6,6 +6,7 @@ class Room:
         self.monsters = []
         self.exits = []
         self.items = []
+        self.npcs = []
     def add_exit(self, exit_name, destination):
         self.exits.append([exit_name, destination])
     def get_destination(self, direction):
@@ -23,6 +24,8 @@ class Room:
         self.items.append(item)
     def remove_item(self, item):
         self.items.remove(item)
+    def add_npcs(self, npc):
+        self.npcs.append(npc)
     def add_monster(self, monster):
         self.monsters.append(monster)
     def remove_monster(self, monster):
@@ -36,8 +39,15 @@ class Room:
         return False
     def has_monsters(self):
         return self.monsters != []
+    def has_npcs(self):
+        return self.npcs != []
     def get_monster_by_name(self, name):
         for i in self.monsters:
+            if i.name.lower() == name.lower():
+                return i
+        return False
+    def get_npc_by_name(self, name):
+        for i in self.npcs:
             if i.name.lower() == name.lower():
                 return i
         return False
