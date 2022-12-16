@@ -1,9 +1,10 @@
 # Reed CS 122 Final Project
 
-## DOCUMENTED BUGS
+## DOCUMENTED BUGS AND NOTES
 
 * For some reason, "Boss" and "Straggler" move, even though they should not be able to.
 * Level up system does not account for non-integer values properly, and will skip assignment of stats if non-integer (?) value is inputted. Be careful here!
+* (NOT A BUG, but) Make sure to buy at least one piece of equipment from the merchant before fighting any opponents, trust me, it really helps.
 
 ## A "story", of sorts
 
