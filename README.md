@@ -1,5 +1,10 @@
 # Reed CS 122 Final Project
 
+## DOCUMENTED BUGS
+
+* For some reason, "Boss" and "Straggler" move, even though they should not be able to.
+* Level up system does not account for non-integer values properly, and will skip assignment of stats if non-integer (?) value is inputted. Be careful here!
+
 ## A "story", of sorts
 
 Your fiancee demands that you buy them a specific ring. 
