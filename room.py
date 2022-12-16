@@ -6,14 +6,14 @@ class Room:
         self.monsters = []
         self.exits = []
         self.items = []
-        self.npcs = []
+        self.npcs = [] # added informatoin about npc's in a current room
     def add_exit(self, exit_name, destination):
         self.exits.append([exit_name, destination])
     def get_destination(self, direction):
         for e in self.exits:
             if e[0] == direction:
                 return e[1]
-        return self
+        return None
     def connect_rooms(room1, dir1, room2, dir2):
         #creates "dir1" exit from room1 to room2 and vice versa
         room1.add_exit(dir1, room2)
@@ -39,17 +39,19 @@ class Room:
         return False
     def has_monsters(self):
         return self.monsters != []
-    def has_npcs(self):
+    def has_npcs(self): # check if room has an npc
         return self.npcs != []
     def get_monster_by_name(self, name):
         for i in self.monsters:
             if i.name.lower() == name.lower():
                 return i
         return False
-    def get_npc_by_name(self, name):
+    def get_npc_by_name(self, name): # check for a specific npc
         for i in self.npcs:
             if i.name.lower() == name.lower():
                 return i
         return False
     def random_neighbor(self):
         return random.choice(self.exits)[1]
+
+            

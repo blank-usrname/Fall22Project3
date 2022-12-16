@@ -20,14 +20,17 @@ class Item:
     def put_in_room(self, room):
         self.loc = room
         room.add_item(self)
-    def is_equippable(self):
+    # functions to check type of an item
+    def is_equippable(self): 
         return False
     def is_consumable(self):
         return False 
+    def is_chest(self):
+        return False
 
 class Weapon(Item):
     def __init__(self, name, desc, atk, wgt, acc, value):
-        super().__init__(name, desc, wgt, value) # weight has additional effect on weapons of lowering one's evasion (does this one make any sense?)
+        super().__init__(name, desc, wgt, value) 
         self.atk = atk # bonus to attack power
         self.acc = acc # accuracy of weapon
         self.loc = None
@@ -48,17 +51,21 @@ class Weapon(Item):
         return True
     def is_consumable(self):
         return False 
+    def is_chest(self):
+        return False
 
 class Armor(Item):
-    def __init__(self, name, desc, defe, wgt,value):
-        super().__init__(name, desc, wgt,value) # weight has additional effect of lowering one's evasion (does this one make any sense?)
+    def __init__(self, name, desc, defe, wgt, eva, value):
+        super().__init__(name, desc, wgt, value)
         self.defe = defe # bonus to defense
+        self.eva = eva # evasion bonus/penalty?
     def describe(self):
         clear()
         print(self.desc)
         print(f"{self.name} statistics:")
         print(f"Defense bonus: +{self.defe}")
-        print(f"Weight: +{self.wgt}")
+        print(f"Evasion: {self.eva}")
+        print(f"Weight: {self.wgt}")
         print()
         input("Press enter to continue...")
     def is_equippable(self):
@@ -67,54 +74,80 @@ class Armor(Item):
         return False
     def is_consumable(self):
         return False 
+    def is_chest(self):
+        return False
+
+class Chest(Item):
+    def __init__(self, name, desc, wgt, value, item):
+        super().__init__(name, desc, wgt, value)
+        self.value = 0 # doesn't make sense,,, for a chest
+        self.wgt = 1000000 # doesn't make sense,,, for a chest
+        self.item = item # contents of a chest
+    def is_equippable(self):
+        return False
+    def is_weapon(self):
+        return False
+    def is_consumable(self):
+        return False 
+    def is_chest(self):
+        return True
+    def unlock(self, player): # chest unlock function,
+        key = player.is_in_inventory("Chest Key")
+        if (key != False): # check if player has a chest key
+            if self.item.wgt + player.curr_carry >= player.carry: # check if player can carry contents of chest
+                print("Unable to hold item, too heavy!")
+            else: # unlock chest and take contents, remove chest from world
+                player.drop(key)
+                player.pickup(self.item)
+                self.loc.remove_item(self)
+        else:
+            print("You do not have a key!")
 
 class Consumable(Item):
-    def __init__(self, name, desc, wgt, hp_heal, buff, buff_type, value):
+    def __init__(self, name, desc, wgt, hp_heal, buff, buff_type, value, stack):
         super().__init__(name, desc, wgt, value)
-        self.hp_heal = hp_heal
-        self.buff = buff
-        self.buff_type = buff_type
+        self.hp_heal = hp_heal # variable associated with consumable items that heal HP
+        self.buff = buff # variable assocaited with consumable items that provide a permanant boost in a stat
+        self.buff_type = buff_type # specify which stat is being buffed
         self.loc = None
+        self.stack = stack # variable counting how many of item player is holding
     def consume(self, player): # this function seems to fit more in player compared to item,,, will change soon
         print(f"Used the {self.name}.")
         print()
-        # if (sp_heal != 0): # two different ifs used here,,, deciding if hp/sp healing items are mutually exclusive... atm no...
-        #     print(f"HP healed by {hp_heal}.")
-        #     print(f"HP healed by {hp_heal}.")
         match self.buff_type:
-            case "mhp":
+            case "mhp": # consuming increases player's max HP by buff
                 print(f"Max HP increased by {self.buff}!")
                 player.mhp += self.buff
                 player.health += self.buff
-            case "mhp":
-                print(f"Max HP increased by {self.buff}!")
-                player.mhp += self.buff
-                player.health += self.buff
-            case "atk":
+            case "atk": # consuming increases player's attack by buff
                 print(f"Attack increased by {self.buff}!")
                 player.atk += self.buff
-            case "def":
+            case "def": # consuming increases player's defense by buff
                 print(f"Defense increased by {self.buff}!")
                 player.defe += self.buff
-            case "heal":
+            case "heal": # consuming recovers player's health by hp_heal
                 player.health += self.hp_heal
-                if (player.health > player.mhp):
+                if (player.health > player.mhp): # check for HP overflow
                     player.health = player.mhp
                     print(f"HP is maxed out.")
                 else:
                     print(f"HP healed by {self.hp_heal}.")
-            case "all":
+            case "all": # consuming increases player's max HP by hp_heal and all non-HP stats by buff
                 print(f"Max HP increased by {self.hp_heal}!")
-                print(f"All stats increased by {self.buff}!")
+                print(f"All other stats increased by {self.buff}!")
                 player.mhp += self.hp_heal
                 player.health += self.hp_heal
                 player.atk += self.buff
-                player.defe += self.buff            
+                player.defe += self.buff
+                player.dex += self.buff
+                player.spd += self.buff
         print()
-        player.items.remove(self)
-        player.curr_carry -= self.wgt
+        player.drop(self)
         input("Press enter to continue...")
     def is_equippable(self):
         return False
     def is_consumable(self):
         return True 
+    def is_chest(self):
+        return False
+
